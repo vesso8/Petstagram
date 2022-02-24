@@ -1,0 +1,24 @@
+from django.shortcuts import render
+
+from petstagram.main.models import Pet_photo
+from petstagram.main.helpers import get_profile
+
+
+def show_home(request):
+    context = {
+        'hide_additional_nav_items' : True,
+    }
+    return render(request, 'home_page.html', context)
+
+def show_dashboard(request):
+    profile = get_profile()
+    pet_photos = set(
+        Pet_photo.objects
+            .prefetch_related('tagged_pets') \
+            .filter(tagged_pets__user_profile=profile)
+    )
+    context = {
+        'pet_photos': pet_photos,
+
+    }
+    return render(request, 'dashboard.html', context)
