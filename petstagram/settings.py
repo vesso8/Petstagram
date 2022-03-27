@@ -6,12 +6,30 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
+#This should be changed
+'''
+Dev -> Whatever
+Proc -> Hidden and very strong
+'''
 SECRET_KEY = 'django-insecure-hs5t($rbxqaj1=t42onas839pnggfj^bdgeokt_5-(4x48=-)!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+#This should be changed
+'''
+Dev -> True
+Proc -> False
+'''
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+'''
+'False' == 'True' => False
+'True' == 'True' => True
+'''
+print(DEBUG)
+#This should be changed
+'''
+Dev -> localhost , 127.0.0.1
+Proc -> petstagram-project.herokuapp.com
+'''
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -78,7 +96,7 @@ WSGI_APPLICATION = 'petstagram.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-
+#This should be changed
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -93,7 +111,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
+#This should be changed
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
