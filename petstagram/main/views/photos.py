@@ -1,22 +1,47 @@
+from django.contrib.auth import mixins as auth_mixins
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views import generic as views
 
 from petstagram.main.forms import CreatePetPhotoForm, EditPetPhotoForm
 from petstagram.main.models import Pet_photo, Pet
-from petstagram.main.helpers import get_profile
 
 
-def show_photo_details(request, pk):
-    pet_photo = Pet_photo.objects\
-        .prefetch_related('tagged_pets')\
-        .get(pk=pk)
+class PetPhotoDetailsView(auth_mixins.LoginRequiredMixin ,views.DetailView):
+    model = Pet_photo
+    template_name = 'templates_main/photo_details.html'
+    context_object_name = 'pet_photo'
 
-    context = {
-        'pet_photo': pet_photo,
-    }
-    return render(request, 'photo_details.html', context)
+    def get_queryset(self):
+
+        return super()\
+            .get_queryset()\
+            .prefetch_related('tagged_pets')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_owner'] = self.object.user == self.request.user
+
+        return context
+
 
 # def error(request):
 #     return render(request, '401_error.html')
+class CreatePetPhotoView(auth_mixins.LoginRequiredMixin ,views.CreateView):
+    template_name = 'templates_main/photo_create.html'
+    form_class = CreatePetPhotoForm
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+#CreatePetPhotoView without CreatePetPhotoForm
+# class CreatePetPhotoView(views.CreateView):
+#       model = Pet_photo
+#     template_name = 'templates_main/photo_create.html'
+#     fields = ('photo', 'description', 'tagged_pets')
+#     success_url = reverse_lazy('dashboard')
+
 
 def like_pet_photo(request, pk):
     pet_photo = Pet_photo.objects.get(pk=pk)
@@ -24,22 +49,13 @@ def like_pet_photo(request, pk):
     pet_photo.save()
     return redirect('pet photo details', pk)
 
-def photo_action(request, form_class, success_url, instance, template_name):
-    if request.method == 'POST':
-        form = form_class(request.POST, request.FILES, instance=instance)
-        if form.is_valid():
-            form.save()
-            return redirect(success_url)
-    else:
-        form = form_class(instance=instance)
-    context = {
-        'form': form,
-        'photo': instance,
-    }
-    return render(request, template_name, context)
 
-def create_photo(request):
-    return photo_action(request, CreatePetPhotoForm, 'dashboard', Pet_photo(), 'photo_create.html')
+class EditPetPhotoView(views.UpdateView):
+    model = Pet_photo
+    template_name = 'templates_main/photo_edit.html'
+    form_class = EditPetPhotoForm
+    success_url = reverse_lazy('dashboard')
+    # fields = ('description', 'tagged_pets')
 
 
 # def edit_photo(request, pk):
@@ -49,20 +65,3 @@ def delete_photo(request, pk):
     photo = Pet_photo.objects.get(pk=pk)
     photo.delete()
     return redirect('index')
-
-
-def edit_photo(request, pk):
-    photo = Pet_photo.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = EditPetPhotoForm(request.POST, instance=photo)
-        if form.is_valid():
-            form.save()
-            return redirect('pet photo details', pk)
-    else:
-        form = EditPetPhotoForm(instance=photo)
-    context = {
-        'form': form,
-        'photo': photo,
-    }
-
-    return render(request, 'photo_edit.html', context)

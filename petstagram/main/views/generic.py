@@ -1,24 +1,21 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.views import generic as views
 
+from petstagram.common.view_mixins import RedirectToDashboard
 from petstagram.main.models import Pet_photo
-from petstagram.main.helpers import get_profile
 
 
-def show_home(request):
-    context = {
-        'hide_additional_nav_items' : True,
-    }
-    return render(request, 'home_page.html', context)
 
-def show_dashboard(request):
-    profile = get_profile()
-    pet_photos = set(
-        Pet_photo.objects
-            .prefetch_related('tagged_pets') \
-            .filter(tagged_pets__user_profile=profile)
-    )
-    context = {
-        'pet_photos': pet_photos,
+class HomeView(RedirectToDashboard ,views.TemplateView):
+    template_name = 'templates_main/home_page.html'
 
-    }
-    return render(request, 'dashboard.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['hide_additional_nav_items'] = True
+        return context
+
+
+class DashboardView(views.ListView):
+    model = Pet_photo
+    template_name = 'templates_main/dashboard.html'
+    context_object_name = 'pet_photos'
