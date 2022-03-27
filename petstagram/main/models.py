@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from cloudinary import models as cloudinary_models
 
 UserModel = get_user_model()
 
@@ -57,13 +58,7 @@ class Pet_photo(models.Model):
     IMAGE_UPLOAD_TO_DIR = 'profiles/'
 
 
-    photo = models.ImageField(
-        upload_to= IMAGE_UPLOAD_TO_DIR,
-        # validators=(
-        #     MaxFileSizeValidator(IMAGE_MAX_SIZE_IN_MB),
-        # ),
-    )
-
+    photo = cloudinary_models.CloudinaryField('image')
     tagged_pets = models.ManyToManyField(
         Pet,
     )
