@@ -20,21 +20,17 @@ Dev -> True
 Proc -> False
 '''
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+APP_ENVIRONMENT = os.getenv('APP_ENVIRONMENT')
 '''
 'False' == 'True' => False
 'True' == 'True' => True
 '''
-print(DEBUG)
 #This should be changed
 '''
 Dev -> localhost , 127.0.0.1
 Proc -> petstagram-project.herokuapp.com
 '''
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'petstagram-project.herokuapp.com',
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
 
 
 # Application definition
@@ -97,16 +93,25 @@ WSGI_APPLICATION = 'petstagram.wsgi.application'
 #     }
 # }
 #This should be changed
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd3q49t0imujfqh',
-        'USER': 'qlscvlriddfgrg',
-        'PASSWORD': 'e0639fb58453c49a0316fef3af028bc663a4f043908cfbd76b80a50293979781',
-        'HOST': 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
-        'PORT': '5432',
+DATABASES = None
+if APP_ENVIRONMENT == "Production":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'd3q49t0imujfqh',
+            'USER': 'qlscvlriddfgrg',
+            'PASSWORD': 'e0639fb58453c49a0316fef3af028bc663a4f043908cfbd76b80a50293979781',
+            'HOST': 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
